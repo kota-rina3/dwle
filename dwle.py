@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication,QMainWindow,QFileDialog,QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.uic import loadUi
-import sys,os,subprocess
+import sys,os,shutil,subprocess
 
 class dwle(QMainWindow):
     def __init__(self):
@@ -14,7 +14,7 @@ class dwle(QMainWindow):
         self.setWindowIcon(QIcon("./dwle.ico"))
 
         self.ChoseLang.addItems(["ja_JP.SJIS","ja_JP.UTF-8","ja_JP.EUC-JP","zh_CN.UTF-8","zh_CN.GB2312","zh_CN.GBK","zh_CN.GB18030","zh_HK.UTF-8","zh_HK.BIG5","zh_TW.EUC-TW","zh_TW.UTF-8","zh_TW.BIG5"])  #"ja_JP.SJIS",
-        self.ChoseWine.addItems(["wine","deepin-wine6-stable","deepin-wine8-stable","deepin-wine10-stable","deepin-wine-staging","deepin-proton9","deepin-ge-proton9","deepin-ge-proton10"])
+        self.ChoseWine.addItems(["wine","deepin-wine6-stable","deepin-wine8-stable","deepin-wine10-stable","deepin-wine11-stable","deepin-wine-staging","deepin-proton9","deepin-ge-proton9","deepin-ge-proton10"])
         
         self.ChoseJP.clicked.connect(self.setjp)
         self.ChoseApp.clicked.connect(self.chooseapp)
@@ -33,7 +33,7 @@ class dwle(QMainWindow):
         self.ChoseWine.setCurrentIndex(0)
 
     def chooseapp(self):
-        exe , _ = QFileDialog.getOpenFileName(self, "选择exe文件", "","Windows程序 (*.exe)")
+        exe , _ = QFileDialog.getOpenFileName(self, "选择Windows软件", "","Windows程序 (*.exe *.msi)")
         self.AppDir.setText(exe)
         #print(self.ChoseLang.currentText()[0:5])
         #print(self.ChoseLang.currentText().split(".")[-1])
@@ -58,9 +58,15 @@ class dwle(QMainWindow):
         "UTF-8": "UTF-8",
         }
         charmap = charmap_map.get(ecding, ecding)
-        if os.path.exists(f"{exedir}/DWLE"):
-            pass
-        else:
+
+        if not exedir.strip():   # 空文本
+            QMessageBox.warning(self, "未导入程序", "请导入程序！")
+            return
+        if not shutil.which(self.ChoseWine.currentText()):   # Wine未安装
+            QMessageBox.warning(self, "选择的Wine找不到", f"请先安装 {self.ChoseWine.currentText()} 软件包！")
+            return
+
+        if not os.path.exists(f"{exedir}/DWLE"):
             subprocess.Popen(["mkdir", exedir+"/DWLE"], encoding="utf-8")
         
         subprocess.Popen(["localedef", "-f", charmap, "-i", locate, os.path.join(exedir, "DWLE", self.ChoseLang.currentText())], encoding="utf-8")
@@ -93,7 +99,7 @@ Comment={appname}''']
         QMessageBox.information(self, "已创建快捷方式", f'已创建{appname}的快捷方式')
     
     def about(self):
-        QMessageBox.about(self, "关于", "Deepin-Wine转区工具\n版本：v3.4\nBy 校医软件室\n来保健室玩：https://github.com/kota-rina3/hokeshi")
+        QMessageBox.about(self, "关于", "Deepin-Wine转区工具 <br>版本：v3.6 <br>By 校医软件室 <br>项目地址：<a href='https://github.com/kota-rina3/dwle'>https://github.com/kota-rina3/dwle</a> <br>来保健室玩：<a href='https://github.com/kota-rina3/hokeshi'>https://github.com/kota-rina3/hokeshi</a>")
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
