@@ -9,9 +9,9 @@ Deepin-Wine转区工具（Deepin Wine Locale Emulator），一款区域变量模
 
 ### 编译
 
-`sudo apt update && sudo apt install pyqt5`
+`sudo apt update && sudo apt install pyqt5 patchelf -y`
 
-`pip3 install pyqt5 nuitka`
+`pip3 install pyqt5 nuitka==4.0.8 zstandard`
 
 `cd dwle`
 
